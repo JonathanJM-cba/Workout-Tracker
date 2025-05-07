@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express, { Request, Response } from "express";
 import cors from "cors";
+import { dbConnection } from "./config/configDb";
 
 const app = express();
 
@@ -16,3 +17,5 @@ app.get("/", (_: Request, res: Response) => {
 app.listen(port, () => {
   console.log(`Servidor corriendo en localhost://${port}`);
 });
+
+dbConnection();
