@@ -1,6 +1,6 @@
 import { userModel } from "../entities";
 import { User } from "../entities/user.entity";
-import { encryptPassword } from "../utils/handlePassword";
+import { checkPassword, encryptPassword } from "../utils/handlePassword";
 
 export const createUser = async (
   name: string,
@@ -18,8 +18,15 @@ export const createUser = async (
   return await userModel.save(newUser);
 };
 
-export const findUserByEmail = async (email: string) => {
+export const findUserByEmail = async (email: string): Promise<User | null> => {
   return await userModel.findOne({
     where: { email: email },
   });
+};
+
+export const verifyPassword = async (
+  password: string,
+  passwordHash: string
+): Promise<boolean> => {
+  return await checkPassword(password, passwordHash);
 };
