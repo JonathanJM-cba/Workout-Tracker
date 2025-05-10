@@ -4,11 +4,12 @@ import {
   createExercise,
   getAllExercises,
 } from "../controllers/exercise.controller";
+import { createExerciseValidator } from "../validators/exercise.validator";
 
 const router: Router = express.Router();
 
 router.get("/", getAllExercises);
 
-router.post("/", createExercise);
+router.post("/", createExerciseValidator, createExercise);
 
 export default router;
