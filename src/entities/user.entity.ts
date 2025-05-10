@@ -2,9 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { Workout } from "./workout.entity";
 
 @Entity("users")
 export class User {
@@ -33,6 +35,10 @@ export class User {
     unique: true,
   })
   password: string;
+
+  //Se define la relación con los entrenamientos, un usuario puede tener uno o muchos entrenamientos
+  @OneToMany(() => Workout, (workout) => workout.user)
+  workouts: Workout[];
 
   @CreateDateColumn({
     type: "timestamptz",

@@ -2,6 +2,8 @@ import { DataSource } from "typeorm";
 import "dotenv/config";
 import { Exercise } from "../entities/exercise.entity";
 import { User } from "../entities/user.entity";
+import { Workout } from "../entities/workout.entity";
+import { WorkoutExercise } from "../entities/workout.exercise.entity";
 
 const dbHost = process.env.DB_HOST;
 const dbPort = process.env.DB_PORT ? Number(process.env.DB_PORT) : 5432;
@@ -16,7 +18,7 @@ export const AppDataSource = new DataSource({
   username: dbUser,
   password: dbPassword,
   database: dbName,
-  entities: [Exercise, User],
+  entities: [Exercise, User, Workout, WorkoutExercise],
   synchronize: true,
 });
 

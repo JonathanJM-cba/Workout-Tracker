@@ -2,47 +2,51 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { ExerciseCategory, MuscleGroup } from "../types/exercise.type";
+import { WorkoutStatus } from "../types/workout.type";
+import { User } from "./user.entity";
 import { WorkoutExercise } from "./workout.exercise.entity";
 
-@Entity("exercises")
-export class Exercise {
+//const defaultStatus: WorkoutStatus = "pendiente";
+
+@Entity("workouts")
+export class Workout {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({
-    type: "varchar",
-    length: 255,
+    type: "timestamp",
     nullable: false,
   })
-  name: string;
+  scheduledDate: Date;
+
+  @Column({
+    type: "varchar",
+    nullable: false,
+    default: "pendiente",
+  })
+  state: WorkoutStatus;
 
   @Column({
     type: "text",
+  })
+  note: string;
+
+  //Se define la relación con usuario, Muchos entrenamientos pertenecen a un usuario
+  @ManyToOne(() => User, (user) => user.workouts, {
+    onDelete: "CASCADE",
     nullable: false,
   })
-  description: string;
+  user: User;
 
-  @Column({
-    type: "varchar",
-    nullable: false,
-  })
-  category: ExerciseCategory;
-
-  @Column({
-    type: "varchar",
-    nullable: false,
-  })
-  muscleGroup: MuscleGroup;
-
-  //Se define la relacion con workoutsExercises
+  //Se define la relación con la tabla intermedia
   @OneToMany(
     () => WorkoutExercise,
-    (workoutExercise) => workoutExercise.exercise
+    (workoutExercise) => workoutExercise.workout
   )
   workoutsExercises: WorkoutExercise[];
 
@@ -55,6 +59,7 @@ export class Exercise {
 
   @UpdateDateColumn({
     type: "timestamptz",
+    nullable: false,
     default: () => "NOW()",
   })
   updatedAt: Date;
