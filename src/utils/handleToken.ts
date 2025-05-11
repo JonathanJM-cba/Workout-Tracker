@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import "dotenv/config";
 import { User } from "../entities";
+import { TokenPayload } from "../types/token.type";
 
 const accessTokenKey: string = process.env.ACCESS_TOKEN_KEY || "llavemaestra";
 
@@ -29,4 +30,13 @@ export const generateAccessToken = async (
     console.log("Error al generar token de acceso: ", error);
     return null;
   }
+};
+
+/**
+ * Función para válidar token
+ * @param {string} token - Pasar el token
+ * @returns
+ */
+export const verifyToken = async (token: string): Promise<TokenPayload> => {
+  return (await jwt.verify(token, accessTokenKey)) as TokenPayload;
 };
