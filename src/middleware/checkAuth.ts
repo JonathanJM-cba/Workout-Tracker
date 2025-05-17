@@ -1,11 +1,12 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { handleHttpError } from "../utils/handleHttpError";
 import { verifyToken } from "../utils/handleToken";
 import { User, userModel } from "../entities";
 import { JwtPayload } from "jsonwebtoken";
+import { AuthenticatedRequest } from "../types/custom-request";
 
 export const checkAuth = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) => {

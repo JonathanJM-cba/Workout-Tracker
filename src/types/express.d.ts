@@ -1,13 +1,11 @@
-import { Request } from "express";
+import { User } from "../entities/user.entity";
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        id: number;
-        name: string;
-        email: string;
-      };
-    }
+declare module "express-serve-static-core" {
+  interface Request {
+    user?: {
+      id: number;
+      name: string;
+      email: string;
+    };
   }
 }
