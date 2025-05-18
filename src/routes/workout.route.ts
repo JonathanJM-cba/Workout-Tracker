@@ -5,12 +5,15 @@ import {
   createWorkout,
   updateWorkout,
 } from "../controllers/workout.controller";
-import { createWorkoutValidator } from "../validators/workout.validator";
+import {
+  createWorkoutValidator,
+  updateWorkoutValidator,
+} from "../validators/workout.validator";
 
 const router: Router = express.Router();
 
 router.post("/", checkAuth, createWorkoutValidator, createWorkout);
 
-router.put("/:idWorkout", checkAuth, updateWorkout);
+router.put("/:idWorkout", checkAuth, updateWorkoutValidator, updateWorkout);
 
 export default router;
