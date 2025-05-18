@@ -143,3 +143,35 @@ const deleteWorkoutExercises = async (workoutId: number) => {
     workout: { id: workoutId },
   });
 };
+
+export const deletedWorkout = async (workoutId: number, userId: number) => {
+  const queryRunner = AppDataSource.createQueryRunner();
+  try {
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    //0. Se verifica si existe el entrenamiento mediante el ID recibido
+    const workout = await workoutModel.findOne({
+      where: { id: workoutId },
+      relations: ["user"],
+    });
+
+    if (!workout) throw new Error("ERROR_WORKOUT_NOT_FOUND");
+
+    //1. Se verifica si el entrenamiento a eliminar fue creado por el usuario correcto
+    if (workout.user.id !== userId)
+      throw new Error("ERROR_NO_DELETE_PERMISSION");
+
+    //2. Caso contrario se elimina el entrenamiento
+    await workoutModel.delete({
+      id: workout.id,
+    });
+
+    await queryRunner.commitTransaction();
+  } catch (error) {
+    await queryRunner.rollbackTransaction();
+    throw error;
+  } finally {
+    await queryRunner.release();
+  }
+};

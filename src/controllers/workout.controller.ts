@@ -1,7 +1,11 @@
 import { Response } from "express";
 import { handleHttpError } from "../utils/handleHttpError";
 import { UpdateWorkoutDto, WorkoutDto } from "../dtos/workout.dto";
-import { saveExercise, updatedWorkout } from "../services/workout.service";
+import {
+  deletedWorkout,
+  saveExercise,
+  updatedWorkout,
+} from "../services/workout.service";
 import { AuthenticatedRequest } from "../types/custom-request";
 
 export const createWorkout = async (
@@ -102,6 +106,36 @@ export const updateWorkout = async (
         default:
           //console.log("Error al crear el entrenamiento: ", error);
           handleHttpError(res, "ERROR_UPDATE_WORKOUT", 500);
+          break;
+      }
+    }
+  }
+};
+
+export const deleteWorkout = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  const { idWorkout } = req.params;
+  const userId = req.user?.id;
+  try {
+    if (!userId) return handleHttpError(res, "ERROR_USER_NOT_FOUND", 404);
+
+    await deletedWorkout(Number(idWorkout), userId);
+
+    res.status(204).json({ message: "Entrenamiento eliminado con éxito" });
+  } catch (error) {
+    if (error instanceof Error) {
+      switch (error.message) {
+        case "ERROR_WORKOUT_NOT_FOUND":
+          handleHttpError(res, "ERROR_WORKOUT_NOT_FOUND", 403);
+          break;
+        case "ERROR_NO_DELETE_PERMISSION":
+          handleHttpError(res, "ERROR_NO_DELETE_PERMISSION", 403);
+          break;
+        default:
+          console.log("Error al intentar eliminar entrenamiento: ", error);
+          handleHttpError(res, "ERROR_DELETE_WORKOUT", 500);
           break;
       }
     }

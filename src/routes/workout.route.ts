@@ -3,6 +3,7 @@ import { Router } from "express";
 import { checkAuth } from "../middleware/checkAuth";
 import {
   createWorkout,
+  deleteWorkout,
   updateWorkout,
 } from "../controllers/workout.controller";
 import {
@@ -15,5 +16,7 @@ const router: Router = express.Router();
 router.post("/", checkAuth, createWorkoutValidator, createWorkout);
 
 router.put("/:idWorkout", checkAuth, updateWorkoutValidator, updateWorkout);
+
+router.delete("/:idWorkout", checkAuth, deleteWorkout);
 
 export default router;
