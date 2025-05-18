@@ -2,7 +2,7 @@ import { Response, Request, NextFunction } from "express";
 import { check, ValidationChain } from "express-validator";
 import { validateResults } from "../utils/handleValidator";
 
-export const workoutValidator: (
+export const createWorkoutValidator: (
   | ValidationChain
   | ((req: Request, res: Response, next: NextFunction) => void)
 )[] = [

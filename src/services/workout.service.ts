@@ -1,6 +1,6 @@
 import { In } from "typeorm";
 import { AppDataSource } from "../config/configDb";
-import { WorkoutDto } from "../dtos/workout.dto";
+import { UpdateWorkoutDto, WorkoutDto } from "../dtos/workout.dto";
 import {
   exerciseModel,
   workoutModel,
@@ -66,4 +66,80 @@ export const saveExercise = async (
   } finally {
     await queryRunner.release();
   }
+};
+
+export const updatedWorkout = async (
+  workoutData: UpdateWorkoutDto,
+  workoutId: number,
+  userId: number | null
+): Promise<Workout> => {
+  const queryRunner = await AppDataSource.createQueryRunner();
+  try {
+    queryRunner.connect();
+    queryRunner.startTransaction();
+
+    //0. Se verifica si existe un entrenamiento con el id ingresado
+    const workout = await workoutModel.findOne({
+      where: { id: workoutId },
+      relations: ["user"],
+    });
+
+    if (!workout) throw new Error("ERROR_WORKOUT_NOT_FOUND");
+    //1. Se actualizan los datos del entrenamiento
+
+    //2. Se verifica si pertenece al usuario que lo creo
+    if (workout?.user.id !== userId)
+      throw new Error("ERROR_NO_UPDATE_WORKOUT_PERMISSION");
+
+    await workoutModel.update(
+      {
+        id: workoutId,
+      },
+      {
+        scheduledDate: workoutData.scheduledDate,
+        note: workoutData.note ? workoutData.note : workout.note,
+        state: workoutData.state,
+      }
+    );
+
+    //3. Se eliminan y se crean los nuevos ejercicios para el entrenamiento. Se utiliza el enfoque DELETE -> INSERT
+    await deleteWorkoutExercises(workoutId);
+
+    //Se crean los nuevo registros
+    const newWorkoutExercises = workoutData.exercises.map((exercise) => {
+      return workoutsExercisesModel.create({
+        sets: exercise.sets,
+        reps: exercise.reps,
+        weightKg: exercise.weightKg ? exercise.weightKg : null,
+        workout: { id: workoutId },
+        exercise: { id: exercise.exerciseId },
+      });
+    });
+
+    //Se insertan los nuevos registros
+    await workoutsExercisesModel.insert(newWorkoutExercises);
+
+    await queryRunner.commitTransaction();
+
+    //Se retorna el entrenamiento actualizado
+    const newWorkout = await workoutModel.findOne({
+      where: { id: workoutId },
+      relations: ["workoutsExercises", "workoutsExercises.exercise"],
+    });
+
+    if (!newWorkout) throw new Error("ERROR_UPDATE_WORKOUT");
+
+    return newWorkout;
+  } catch (error) {
+    await queryRunner.rollbackTransaction();
+    throw error;
+  } finally {
+    await queryRunner.release();
+  }
+};
+
+const deleteWorkoutExercises = async (workoutId: number) => {
+  await workoutsExercisesModel.delete({
+    workout: { id: workoutId },
+  });
 };

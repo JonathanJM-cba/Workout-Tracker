@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { handleHttpError } from "../utils/handleHttpError";
-import { WorkoutDto } from "../dtos/workout.dto";
-import { saveExercise } from "../services/workout.service";
+import { UpdateWorkoutDto, WorkoutDto } from "../dtos/workout.dto";
+import { saveExercise, updatedWorkout } from "../services/workout.service";
 import { AuthenticatedRequest } from "../types/custom-request";
 
 export const createWorkout = async (
@@ -48,6 +48,60 @@ export const createWorkout = async (
           break;
         default:
           handleHttpError(res, "ERROR_CREATE_EXERCISE", 500);
+          break;
+      }
+    }
+  }
+};
+
+export const updateWorkout = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  const { scheduledDate, note, state, exercises } = req.body;
+  const { idWorkout } = req.params;
+  const userId = req.user?.id;
+  try {
+    const workoutDate = new Date(scheduledDate);
+    const currentDate = new Date();
+
+    workoutDate.setMilliseconds(0);
+    currentDate.setMilliseconds(0);
+
+    if (workoutDate <= currentDate)
+      return handleHttpError(res, "ERROR_TRAINING_DATE_MUST_BE_FUTURE", 400);
+    const workoutData: UpdateWorkoutDto = {
+      scheduledDate: workoutDate,
+      note: note ? note : "",
+      state: state,
+      exercises: exercises.map((ex: any) => ({
+        exerciseId: Number(ex.exerciseId),
+        sets: Number(ex.sets),
+        reps: Number(ex.reps),
+        weightKg: ex.weightKg ? Number(ex.weightKg) : null,
+      })),
+    };
+    const workout = await updatedWorkout(
+      workoutData,
+      Number(idWorkout),
+      Number(userId)
+    );
+
+    res
+      .status(200)
+      .json({ message: "Entrenamiento actualizado con éxito", data: workout });
+  } catch (error) {
+    if (error instanceof Error) {
+      switch (error.message) {
+        case "ERROR_WORKOUT_NOT_FOUND":
+          handleHttpError(res, "ERROR_WORKOUT_NOT_FOUND", 404);
+          break;
+        case "ERROR_NO_UPDATE_WORKOUT_PERMISSION":
+          handleHttpError(res, "ERROR_NO_UPDATE_WORKOUT_PERMISSION", 403);
+          break;
+        default:
+          //console.log("Error al crear el entrenamiento: ", error);
+          handleHttpError(res, "ERROR_UPDATE_WORKOUT", 500);
           break;
       }
     }
