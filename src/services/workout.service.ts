@@ -225,3 +225,14 @@ export const scheduleTraining = async (
     await queryRunner.release();
   }
 };
+
+export const listWorkouts = async (userId: number): Promise<Workout[]> => {
+  const workouts = await workoutModel.find({
+    where: {
+      user: { id: userId },
+    },
+    relations: ["workoutsExercises", "workoutsExercises.exercise"],
+    order: { scheduledDate: "ASC" },
+  });
+  return workouts;
+};

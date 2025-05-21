@@ -3,6 +3,7 @@ import { handleHttpError } from "../utils/handleHttpError";
 import { UpdateWorkoutDto, WorkoutDto } from "../dtos/workout.dto";
 import {
   deletedWorkout,
+  listWorkouts,
   saveExercise,
   scheduleTraining,
   updatedWorkout,
@@ -188,5 +189,19 @@ export const scheduleWorkout = async (
           break;
       }
     }
+  }
+};
+
+export const getAllWorkouts = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  const userId = req.user?.id;
+  try {
+    const workouts = await listWorkouts(Number(userId));
+
+    res.status(200).json(workouts);
+  } catch (error) {
+    handleHttpError(res, "ERROR_GET_ALL_WORKOUTS", 500);
   }
 };

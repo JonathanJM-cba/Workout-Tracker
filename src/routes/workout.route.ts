@@ -4,6 +4,7 @@ import { checkAuth } from "../middleware/checkAuth";
 import {
   createWorkout,
   deleteWorkout,
+  getAllWorkouts,
   scheduleWorkout,
   updateWorkout,
 } from "../controllers/workout.controller";
@@ -27,5 +28,7 @@ router.patch(
   scheduleTrainingValidator,
   scheduleWorkout
 );
+
+router.get("/", checkAuth, getAllWorkouts);
 
 export default router;
