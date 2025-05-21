@@ -131,3 +131,21 @@ export const updateWorkoutValidator: (
     return validateResults(req, res, next);
   },
 ];
+
+export const scheduleTrainingValidator: (
+  | ValidationChain
+  | ((req: Request, res: Response, next: NextFunction) => void)
+)[] = [
+  check("scheduleDate")
+    .exists()
+    .withMessage("El campo scheduleDate debe existir")
+    .notEmpty()
+    .withMessage("El campo scheduleDate no debe estar vacío")
+    .isISO8601()
+    .withMessage(
+      "El campo scheduledDate debe ser una fecha válida en formato ISO8601 (YYYY-MM-DDTHH:MM:SSZ)"
+    ),
+  (req: Request, res: Response, next: NextFunction) => {
+    return validateResults(req, res, next);
+  },
+];

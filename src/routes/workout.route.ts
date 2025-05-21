@@ -9,6 +9,7 @@ import {
 } from "../controllers/workout.controller";
 import {
   createWorkoutValidator,
+  scheduleTrainingValidator,
   updateWorkoutValidator,
 } from "../validators/workout.validator";
 
@@ -20,6 +21,11 @@ router.put("/:idWorkout", checkAuth, updateWorkoutValidator, updateWorkout);
 
 router.delete("/:idWorkout", checkAuth, deleteWorkout);
 
-router.patch("/schedule/:idWorkout", checkAuth, scheduleWorkout);
+router.patch(
+  "/schedule/:idWorkout",
+  checkAuth,
+  scheduleTrainingValidator,
+  scheduleWorkout
+);
 
 export default router;
