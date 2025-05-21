@@ -4,6 +4,7 @@ import { checkAuth } from "../middleware/checkAuth";
 import {
   createWorkout,
   deleteWorkout,
+  scheduleWorkout,
   updateWorkout,
 } from "../controllers/workout.controller";
 import {
@@ -18,5 +19,7 @@ router.post("/", checkAuth, createWorkoutValidator, createWorkout);
 router.put("/:idWorkout", checkAuth, updateWorkoutValidator, updateWorkout);
 
 router.delete("/:idWorkout", checkAuth, deleteWorkout);
+
+router.patch("/schedule/:idWorkout", checkAuth, scheduleWorkout);
 
 export default router;

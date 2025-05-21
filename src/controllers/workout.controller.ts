@@ -4,6 +4,7 @@ import { UpdateWorkoutDto, WorkoutDto } from "../dtos/workout.dto";
 import {
   deletedWorkout,
   saveExercise,
+  scheduleTraining,
   updatedWorkout,
 } from "../services/workout.service";
 import { AuthenticatedRequest } from "../types/custom-request";
@@ -136,6 +137,54 @@ export const deleteWorkout = async (
         default:
           console.log("Error al intentar eliminar entrenamiento: ", error);
           handleHttpError(res, "ERROR_DELETE_WORKOUT", 500);
+          break;
+      }
+    }
+  }
+};
+
+export const scheduleWorkout = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  const { scheduleDate } = req.body;
+  const userId = req.user?.id;
+  const { idWorkout } = req.params;
+  try {
+    const workoutDate = new Date(scheduleDate);
+    const currentDate = new Date();
+
+    workoutDate.setMilliseconds(0);
+    currentDate.setMilliseconds(0);
+
+    if (workoutDate <= currentDate)
+      return handleHttpError(res, "ERROR_TRAINING_DATE_MUST_BE_FUTURE", 400);
+
+    //Se consume el servicio
+    const training = await scheduleTraining(
+      Number(idWorkout),
+      workoutDate,
+      Number(userId)
+    );
+
+    res
+      .status(200)
+      .json({ message: "Entrenamiento programado con éxito", data: training });
+  } catch (error) {
+    if (error instanceof Error) {
+      switch (error.message) {
+        case "ERROR_WORKOUT_NOT_FOUND":
+          handleHttpError(res, "ERROR_WORKOUT_NOT_FOUND", 404);
+          break;
+        case "ERROR_NO_SCHEDULE_TRAINING_PERMISSION":
+          handleHttpError(res, "ERROR_NO_SCHEDULE_TRAINING_PERMISSION", 403);
+          break;
+        default:
+          console.log(
+            "Error al intentar programar entrenamiento: ",
+            error.message
+          );
+          handleHttpError(res, "ERROR_SCHEDULE_TRAINING", 500);
           break;
       }
     }

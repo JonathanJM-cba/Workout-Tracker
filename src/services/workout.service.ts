@@ -175,3 +175,53 @@ export const deletedWorkout = async (workoutId: number, userId: number) => {
     await queryRunner.release();
   }
 };
+
+export const scheduleTraining = async (
+  workoutId: number,
+  scheduleDate: Date,
+  userId: number
+): Promise<Workout> => {
+  const queryRunner = AppDataSource.createQueryRunner();
+  try {
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    //0. Se verifica la existencia del entrenamiento
+    const workout = await workoutModel.findOne({
+      where: { id: workoutId },
+      relations: ["user"],
+    });
+
+    if (!workout) throw new Error("ERROR_WORKOUT_NOT_FOUND");
+
+    //1. Se verifica si el entrenamiento pertenece al usuario que lo creo
+    if (workout.user.id !== userId)
+      throw new Error("ERROR_NO_SCHEDULE_TRAINING_PERMISSION");
+
+    //2. Se actualiza la fecha del entrenamiento
+    await workoutModel.update(
+      {
+        id: workout.id,
+      },
+      {
+        scheduledDate: scheduleDate,
+      }
+    );
+
+    await queryRunner.commitTransaction();
+
+    const training = await workoutModel.findOne({
+      where: { id: workout.id },
+      relations: ["workoutsExercises", "workoutsExercises.exercise"],
+    });
+
+    if (!training) throw new Error("ERROR_SCHEDULE_TRAINING");
+
+    return training;
+  } catch (error) {
+    await queryRunner.rollbackTransaction();
+    throw error;
+  } finally {
+    await queryRunner.release();
+  }
+};
