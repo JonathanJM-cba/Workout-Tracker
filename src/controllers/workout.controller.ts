@@ -47,14 +47,11 @@ export const createWorkout = async (
     if (error instanceof Error) {
       switch (error.message) {
         case "ERROR_USER_NOT_FOUND":
-          handleHttpError(res, "ERROR_USER_NOT_FOUND", 401);
-          break;
+          return handleHttpError(res, "ERROR_USER_NOT_FOUND", 401);
         case "ERROR_EXERCISE_NOT_FOUND":
-          handleHttpError(res, "ERROR_EXERCISE_NOT_FOUND", 404);
-          break;
+          return handleHttpError(res, "ERROR_EXERCISE_NOT_FOUND", 404);
         default:
-          handleHttpError(res, "ERROR_CREATE_EXERCISE", 500);
-          break;
+          return handleHttpError(res, "ERROR_CREATE_EXERCISE", 500);
       }
     }
   }
